@@ -13,10 +13,81 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
-            padding: 20px;
             color: #333;
+            display: flex;
+        }
+
+        /* 左侧导航栏样式 */
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .category-item:hover {
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateX(5px);
+        }
+
+        .category-item.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .category-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* 移动端菜单按钮 */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 主内容区域样式 */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
         }
 
         .container {
@@ -101,11 +172,6 @@
             align-items: center;
         }
 
-        .category-icon {
-            margin-right: 10px;
-            font-size: 1.5rem;
-        }
-
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -122,6 +188,9 @@
             border: 1px solid rgba(52, 152, 219, 0.1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .tool-card::before {
@@ -146,6 +215,10 @@
             color: white;
         }
 
+        .tool-card:hover .tool-desc {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         .tool-name {
             font-weight: 600;
             font-size: 14px;
@@ -153,34 +226,40 @@
             line-height: 1.4;
         }
 
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 40px 0;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-        }
-
-        .stat-item {
+        .tool-desc {
+            font-size: 12px;
+            color: #666;
             text-align: center;
-            color: white;
+            line-height: 1.4;
+            transition: color 0.3s ease;
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            display: block;
-        }
-
-        .stat-label {
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.9rem;
-            opacity: 0.9;
         }
 
+        /* 响应式设计 */
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 999;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
             .categories {
                 grid-template-columns: 1fr;
             }
@@ -192,18 +271,6 @@
             .header h1 {
                 font-size: 2rem;
             }
-            
-            .stats {
-                flex-direction: column;
-                gap: 20px;
-            }
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -217,406 +284,569 @@
   gtag('config', 'G-5ENW78EQ3V');
 </script>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 技术工具导航站</h1>
-            <p>一站式技术工具导航，助力开发者高效工作</p>
-            
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="搜索工具名称..." id="searchInput">
-            </div>
+    <!-- 移动端菜单按钮 -->
+    <div class="menu-toggle" id="menuToggle">
+        ☰
+    </div>
+
+    <!-- 左侧导航栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>工具分类</h2>
         </div>
+        <ul class="category-list" id="categoryList">
+            <!-- 分类列表将通过 JavaScript 动态生成 -->
+        </ul>
+    </div>
 
-        <div class="stats">
-            <div class="stat-item">
-                <span class="stat-number" id="toolCount">0</span>
-                <span class="stat-label">工具总数</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number" id="categoryCount">0</span>
-                <span class="stat-label">分类数量</span>
-            </div>
-        </div>
-
-        <div class="categories" id="categoriesContainer">
-            <!-- 编程语言 & JDK -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">💻</span>
-                    编程语言 & JDK
-                </div>
-                <div class="tools-grid">
-                    <a href="https://www.oracle.com/java/" class="tool-card" target="_blank">
-                        <div class="tool-name">Oracle JDK</div>
-                    </a>
-                    <a href="https://openjdk.org/" class="tool-card" target="_blank">
-                        <div class="tool-name">OpenJDK</div>
-                    </a>
-                    <a href="https://www.python.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Python</div>
-                    </a>
-                    <a href="https://www.scala-lang.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Scala</div>
-                    </a>
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <div class="container">
+            <div class="header">
+                <h1>🚀 技术工具导航站</h1>
+                <p>一站式技术工具导航，助力开发者高效工作</p>
+                
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="搜索工具名称..." id="searchInput">
                 </div>
             </div>
 
-            <!-- 开发工具 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🛠️</span>
-                    开发工具
+            <div class="categories" id="categoriesContainer">
+                <!-- 编程语言 & JDK -->
+                <div class="category" data-category="programming">
+                    <div class="category-title">
+                        <span class="category-icon">💻</span>
+                        编程语言 & JDK
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.oracle.com/java/" class="tool-card" target="_blank">
+                            <div class="tool-name">Oracle JDK</div>
+                            <div class="tool-desc">Oracle官方的Java开发工具包，提供商业支持和更新</div>
+                        </a>
+                        <a href="https://openjdk.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">OpenJDK</div>
+                            <div class="tool-desc">开源的Java开发工具包，免费且功能完整</div>
+                        </a>
+                        <a href="https://www.python.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Python</div>
+                            <div class="tool-desc">简单易学的高级编程语言，广泛用于数据科学和Web开发</div>
+                        </a>
+                        <a href="https://www.scala-lang.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Scala</div>
+                            <div class="tool-desc">运行在JVM上的多范式编程语言，结合了面向对象和函数式编程</div>
+                        </a>
+                        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" class="tool-card" target="_blank">
+                            <div class="tool-name">JavaScript</div>
+                            <div class="tool-desc">网页开发的核心语言，同时支持前端和后端开发</div>
+                        </a>
+                        <a href="https://go.dev/" class="tool-card" target="_blank">
+                            <div class="tool-name">Go</div>
+                            <div class="tool-desc">Google开发的高性能语言，适合构建微服务和云原生应用</div>
+                        </a>
+                        <a href="https://isocpp.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">C++</div>
+                            <div class="tool-desc">高性能系统编程语言，广泛用于游戏开发和底层系统</div>
+                        </a>
+                        <a href="https://www.ruby-lang.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Ruby</div>
+                            <div class="tool-desc">注重简洁和生产力的动态语言，流行的Web框架Rails的基础</div>
+                        </a>
+                        <a href="https://www.rust-lang.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Rust</div>
+                            <div class="tool-desc">现代系统编程语言，注重安全性和并发，无需垃圾回收</div>
+                        </a>
+                    </div>
                 </div>
-                <div class="tools-grid">
-                    <a href="https://www.jetbrains.com/idea" class="tool-card" target="_blank">
-                        <div class="tool-name">IntelliJ IDEA</div>
-                    </a>
-                    <a href="https://www.jetbrains.com/pycharm" class="tool-card" target="_blank">
-                        <div class="tool-name">PyCharm</div>
-                    </a>
-                    <a href="https://www.sublimetext.com" class="tool-card" target="_blank">
-                        <div class="tool-name">Sublime Text</div>
-                    </a>
-                    <a href="https://notepad-plus-plus.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Notepad++</div>
-                    </a>
-                    <a href="https://dbeaver.io" class="tool-card" target="_blank">
-                        <div class="tool-name">DBeaver</div>
-                    </a>
-                    <a href="https://www.postman.com" class="tool-card" target="_blank">
-                        <div class="tool-name">Postman</div>
-                    </a>
-                    <a href="https://www.apifox.cn" class="tool-card" target="_blank">
-                        <div class="tool-name">Apifox</div>
-                    </a>
-                    <a href="https://redis.com/redis-enterprise/redis-insight" class="tool-card" target="_blank">
-                        <div class="tool-name">Redis Insight</div>
-                    </a>
+
+                <!-- 开发工具 -->
+                <div class="category" data-category="development">
+                    <div class="category-title">
+                        <span class="category-icon">🛠️</span>
+                        开发工具
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.jetbrains.com/idea" class="tool-card" target="_blank">
+                            <div class="tool-name">IntelliJ IDEA</div>
+                            <div class="tool-desc">功能强大的Java IDE，支持多种编程语言和框架</div>
+                        </a>
+                        <a href="https://www.jetbrains.com/pycharm" class="tool-card" target="_blank">
+                            <div class="tool-name">PyCharm</div>
+                            <div class="tool-desc">专业的Python开发工具，提供智能代码补全和调试功能</div>
+                        </a>
+                        <a href="https://www.sublimetext.com" class="tool-card" target="_blank">
+                            <div class="tool-name">Sublime Text</div>
+                            <div class="tool-desc">轻量级文本编辑器，启动快速且扩展性强</div>
+                        </a>
+                        <a href="https://notepad-plus-plus.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Notepad++</div>
+                            <div class="tool-desc">免费的文本编辑器，支持多种编程语言的语法高亮</div>
+                        </a>
+                        <a href="https://dbeaver.io" class="tool-card" target="_blank">
+                            <div class="tool-name">DBeaver</div>
+                            <div class="tool-desc">通用数据库管理工具，支持多种数据库类型</div>
+                        </a>
+                        <a href="https://www.postman.com" class="tool-card" target="_blank">
+                            <div class="tool-name">Postman</div>
+                            <div class="tool-desc">强大的API开发和测试工具，支持团队协作</div>
+                        </a>
+                        <a href="https://www.apifox.cn" class="tool-card" target="_blank">
+                            <div class="tool-name">Apifox</div>
+                            <div class="tool-desc">API设计、开发、测试一体化协作平台</div>
+                        </a>
+                        <a href="https://redis.com/redis-enterprise/redis-insight" class="tool-card" target="_blank">
+                            <div class="tool-name">Redis Insight</div>
+                            <div class="tool-desc">Redis官方可视化管理工具，支持数据查看和性能监控</div>
+                        </a>
+                        <a href="https://code.visualstudio.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">VS Code</div>
+                            <div class="tool-desc">微软开源的代码编辑器，轻量级且插件丰富</div>
+                        </a>
+                        <a href="https://visualstudio.microsoft.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Visual Studio</div>
+                            <div class="tool-desc">微软强大的集成开发环境，适合.NET开发</div>
+                        </a>
+                        <a href="https://www.eclipse.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Eclipse</div>
+                            <div class="tool-desc">开源的集成开发环境，支持多种编程语言</div>
+                        </a>
+                        <a href="https://www.navicat.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Navicat</div>
+                            <div class="tool-desc">专业的数据库管理工具，界面友好操作简单</div>
+                        </a>
+                        <a href="https://www.docker.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Docker</div>
+                            <div class="tool-desc">容器化平台，用于应用程序的构建、部署和运行</div>
+                        </a>
+                        <a href="https://kubernetes.io/" class="tool-card" target="_blank">
+                            <div class="tool-name">Kubernetes</div>
+                            <div class="tool-desc">容器编排平台，用于自动化部署和管理容器化应用</div>
+                        </a>
+                        <a href="https://www.wireshark.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Wireshark</div>
+                            <div class="tool-desc">网络协议分析工具，用于抓包和网络调试</div>
+                        </a>
+                        <a href="https://www.sourcetreeapp.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Sourcetree</div>
+                            <div class="tool-desc">Git可视化管理工具，简化版本控制操作</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 网络/远程工具 -->
+                <div class="category" data-category="networking">
+                    <div class="category-title">
+                        <span class="category-icon">🌐</span>
+                        网络/远程工具
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.netsarang.com/xshell" class="tool-card" target="_blank">
+                            <div class="tool-name">Xshell</div>
+                            <div class="tool-desc">专业的SSH客户端工具，支持多标签和会话管理</div>
+                        </a>
+                        <a href="https://www.vandyke.com/securecrt" class="tool-card" target="_blank">
+                            <div class="tool-name">SecureCRT</div>
+                            <div class="tool-desc">安全可靠的终端仿真程序，支持多种协议连接</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 数据库 -->
+                <div class="category" data-category="database">
+                    <div class="category-title">
+                        <span class="category-icon">🗄️</span>
+                        数据库
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.mysql.com" class="tool-card" target="_blank">
+                            <div class="tool-name">MySQL</div>
+                            <div class="tool-desc">最流行的开源关系型数据库，适用于各类应用场景</div>
+                        </a>
+                        <a href="https://redis.io" class="tool-card" target="_blank">
+                            <div class="tool-name">Redis</div>
+                            <div class="tool-desc">高性能的键值对存储数据库，常用于缓存和消息队列</div>
+                        </a>
+                        <a href="https://www.elastic.co/elasticsearch" class="tool-card" target="_blank">
+                            <div class="tool-name">Elasticsearch</div>
+                            <div class="tool-desc">分布式搜索和分析引擎，适用于全文检索和日志分析</div>
+                        </a>
+                        <a href="https://www.mongodb.com" class="tool-card" target="_blank">
+                            <div class="tool-name">MongoDB</div>
+                            <div class="tool-desc">流行的文档型数据库，适合处理非结构化数据</div>
+                        </a>
+                        <a href="https://kudu.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Kudu</div>
+                            <div class="tool-desc">快速分析型列式存储引擎，适合实时分析场景</div>
+                        </a>
+                        <a href="https://pingcap.com" class="tool-card" target="_blank">
+                            <div class="tool-name">TiDB</div>
+                            <div class="tool-desc">开源分布式关系型数据库，兼容MySQL协议</div>
+                        </a>
+                        <a href="https://hbase.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">HBase</div>
+                            <div class="tool-desc">分布式列式数据库，适合海量数据的随机读写</div>
+                        </a>
+                        <a href="https://kylin.apache.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Kylin</div>
+                            <div class="tool-desc">开源的分布式分析引擎，提供SQL接口查询海量数据</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 大数据存储 & 计算 -->
+                <div class="category" data-category="bigdata">
+                    <div class="category-title">
+                        <span class="category-icon">📊</span>
+                        大数据存储 & 计算
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://hadoop.apache.org/hdfs" class="tool-card" target="_blank">
+                            <div class="tool-name">HDFS</div>
+                            <div class="tool-desc">Hadoop分布式文件系统，用于存储海量数据</div>
+                        </a>
+                        <a href="https://hadoop.apache.org/yarn" class="tool-card" target="_blank">
+                            <div class="tool-name">YARN</div>
+                            <div class="tool-desc">Hadoop的资源管理和作业调度系统</div>
+                        </a>
+                        <a href="https://spark.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Spark</div>
+                            <div class="tool-desc">快速的大规模数据处理引擎，支持多种计算模式</div>
+                        </a>
+                        <a href="https://hive.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Hive</div>
+                            <div class="tool-desc">基于Hadoop的数据仓库工具，提供SQL查询功能</div>
+                        </a>
+                        <a href="https://hudi.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Hudi</div>
+                            <div class="tool-desc">数据湖存储框架，支持增量处理和事务</div>
+                        </a>
+                        <a href="https://iceberg.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Iceberg</div>
+                            <div class="tool-desc">高性能数据湖格式，支持大规模数据的版本管理</div>
+                        </a>
+                        <a href="https://delta.io" class="tool-card" target="_blank">
+                            <div class="tool-name">DataLake</div>
+                            <div class="tool-desc">开源数据湖解决方案，提供ACID事务支持</div>
+                        </a>
+                        <a href="https://www.starrocks.io" class="tool-card" target="_blank">
+                            <div class="tool-name">StarRocks</div>
+                            <div class="tool-desc">新一代MPP数据库，适用于实时分析场景</div>
+                        </a>
+                        <a href="https://clickhouse.com" class="tool-card" target="_blank">
+                            <div class="tool-name">ClickHouse</div>
+                            <div class="tool-desc">高性能列式数据库，适合OLAP查询场景</div>
+                        </a>
+                        <a href="https://prestodb.io" class="tool-card" target="_blank">
+                            <div class="tool-name">Presto</div>
+                            <div class="tool-desc">分布式SQL查询引擎，支持多数据源查询</div>
+                        </a>
+                        <a href="https://trino.io" class="tool-card" target="_blank">
+                            <div class="tool-name">Trino</div>
+                            <div class="tool-desc">高性能分布式查询引擎，原Presto项目分支</div>
+                        </a>
+                        <a href="https://kafka.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Kafka</div>
+                            <div class="tool-desc">高性能分布式流处理平台，用于实时数据管道</div>
+                        </a>
+                        <a href="https://flink.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Flink</div>
+                            <div class="tool-desc">分布式流处理和批处理系统，支持事件驱动应用</div>
+                        </a>
+                        <a href="https://paimon.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Paimon</div>
+                            <div class="tool-desc">流式数据湖存储框架，支持高性能实时分析</div>
+                        </a>
+                        <a href="https://zookeeper.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">ZooKeeper</div>
+                            <div class="tool-desc">分布式协调服务，用于维护配置和命名服务</div>
+                        </a>
+                        <a href="https://pulsar.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Pulsar</div>
+                            <div class="tool-desc">云原生分布式消息系统，支持多租户架构</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 大数据调度工具 -->
+                <div class="category" data-category="bigdata">
+                    <div class="category-title">
+                        <span class="category-icon">⏰</span>
+                        大数据调度工具
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://oozie.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Oozie</div>
+                            <div class="tool-desc">Hadoop生态的工作流调度系统，基于XML配置</div>
+                        </a>
+                        <a href="https://dolphinscheduler.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">DolphinScheduler</div>
+                            <div class="tool-desc">分布式工作流调度平台，支持可视化DAG定义</div>
+                        </a>
+                        <a href="https://airflow.apache.org" class="tool-card" target="_blank">
+                            <div class="tool-name">Airflow</div>
+                            <div class="tool-desc">使用Python编写的工作流管理平台，灵活可扩展</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ETL/数据集成 -->
+                <div class="category" data-category="etl">
+                    <div class="category-title">
+                        <span class="category-icon">🔄</span>
+                        ETL/数据集成
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.kettle.be/" class="tool-card" target="_blank">
+                            <div class="tool-name">Kettle</div>
+                            <div class="tool-desc">开源ETL工具，提供图形化界面设计数据集成流程</div>
+                        </a>
+                        <a href="https://nifi.apache.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Apache NiFi</div>
+                            <div class="tool-desc">强大的数据流自动化工具，支持复杂的数据路由</div>
+                        </a>
+                        <a href="https://www.talend.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Talend</div>
+                            <div class="tool-desc">企业级数据集成平台，提供全面的数据管理解决方案</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- BI & 数据可视化 -->
+                <div class="category" data-category="bi">
+                    <div class="category-title">
+                        <span class="category-icon">📈</span>
+                        BI & 数据可视化
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.tableau.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Tableau</div>
+                            <div class="tool-desc">直观的数据可视化工具，适合创建交互式仪表板</div>
+                        </a>
+                        <a href="https://powerbi.microsoft.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Power BI</div>
+                            <div class="tool-desc">微软的商业智能工具，与Office套件深度集成</div>
+                        </a>
+                        <a href="https://echarts.apache.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">ECharts</div>
+                            <div class="tool-desc">百度开源的数据可视化库，支持丰富的图表类型</div>
+                        </a>
+                        <a href="https://superset.apache.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Superset</div>
+                            <div class="tool-desc">现代化的数据探索和可视化平台，支持多种数据源</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- SQL 学习 -->
+                <div class="category" data-category="sql">
+                    <div class="category-title">
+                        <span class="category-icon">📚</span>
+                        SQL 学习
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.w3schools.com/sql/" class="tool-card" target="_blank">
+                            <div class="tool-name">W3Schools SQL</div>
+                            <div class="tool-desc">免费的SQL教程网站，提供在线练习环境</div>
+                        </a>
+                        <a href="https://www.sqlzoo.net/" class="tool-card" target="_blank">
+                            <div class="tool-name">SQL Zoo</div>
+                            <div class="tool-desc">交互式SQL学习平台，提供阶段性练习题</div>
+                        </a>
+                        <a href="https://leetcode.com/problemset/database/" class="tool-card" target="_blank">
+                            <div class="tool-name">LeetCode SQL</div>
+                            <div class="tool-desc">包含各种难度的SQL练习题，适合深入学习</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 代码管理 & 构建工具 -->
+                <div class="category" data-category="code">
+                    <div class="category-title">
+                        <span class="category-icon">🔧</span>
+                        代码管理 & 构建工具
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://git-scm.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Git</div>
+                            <div class="tool-desc">最流行的分布式版本控制系统，用于代码管理</div>
+                        </a>
+                        <a href="https://maven.apache.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Maven</div>
+                            <div class="tool-desc">Java项目管理和构建工具，提供依赖管理功能</div>
+                        </a>
+                        <a href="https://gradle.org/" class="tool-card" target="_blank">
+                            <div class="tool-name">Gradle</div>
+                            <div class="tool-desc">灵活的项目自动化构建工具，支持多种编程语言</div>
+                        </a>
+                        <a href="https://jenkins.io/" class="tool-card" target="_blank">
+                            <div class="tool-name">Jenkins</div>
+                            <div class="tool-desc">流行的持续集成工具，支持自动化构建和部署</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 绘图/思维导图 -->
+                <div class="category" data-category="drawing">
+                    <div class="category-title">
+                        <span class="category-icon">🎨</span>
+                        绘图/思维导图
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://www.diagrams.net/" class="tool-card" target="_blank">
+                            <div class="tool-name">Draw.io</div>
+                            <div class="tool-desc">免费的在线图表绘制工具，支持多种图表类型</div>
+                        </a>
+                        <a href="https://www.xmind.net/" class="tool-card" target="_blank">
+                            <div class="tool-name">XMind</div>
+                            <div class="tool-desc">专业的思维导图工具，适合项目规划和知识管理</div>
+                        </a>
+                        <a href="https://plantuml.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">PlantUML</div>
+                            <div class="tool-desc">通过文本描述生成UML图，适合软件设计文档</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 社区 -->
+                <div class="category" data-category="community">
+                    <div class="category-title">
+                        <span class="category-icon">👥</span>
+                        社区
+                    </div>
+                    <div class="tools-grid">
+                        <a href="https://stackoverflow.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">Stack Overflow</div>
+                            <div class="tool-desc">最大的程序员问答社区，解决编程问题的好去处</div>
+                        </a>
+                        <a href="https://github.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">GitHub</div>
+                            <div class="tool-desc">全球最大的代码托管平台，开源项目的聚集地</div>
+                        </a>
+                        <a href="https://segmentfault.com/" class="tool-card" target="_blank">
+                            <div class="tool-name">SegmentFault</div>
+                            <div class="tool-desc">中文技术社区，提供问答和技术文章分享</div>
+                        </a>
+                        <a href="https://juejin.cn/" class="tool-card" target="_blank">
+                            <div class="tool-name">掘金</div>
+                            <div class="tool-desc">高质量的中文技术社区，关注前沿技术动态</div>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- 网络/远程工具 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🌐</span>
-                    网络/远程工具
-                </div>
-                <div class="tools-grid">
-                    <a href="https://www.netsarang.com/xshell" class="tool-card" target="_blank">
-                        <div class="tool-name">Xshell</div>
-                    </a>
-                    <a href="https://www.vandyke.com/securecrt" class="tool-card" target="_blank">
-                        <div class="tool-name">SecureCRT</div>
-                    </a>
-                </div>
+            <div class="footer">
+                <p>© 2025 技术工具导航站 | 为开发者精心打造</p>
             </div>
-
-            <!-- 数据库 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🗄️</span>
-                    数据库
-                </div>
-                <div class="tools-grid">
-                    <a href="https://www.mysql.com" class="tool-card" target="_blank">
-                        <div class="tool-name">MySQL</div>
-                    </a>
-                    <a href="https://redis.io" class="tool-card" target="_blank">
-                        <div class="tool-name">Redis</div>
-                    </a>
-                    <a href="https://www.elastic.co/elasticsearch" class="tool-card" target="_blank">
-                        <div class="tool-name">Elasticsearch</div>
-                    </a>
-                    <a href="https://www.mongodb.com" class="tool-card" target="_blank">
-                        <div class="tool-name">MongoDB</div>
-                    </a>
-                    <a href="https://kudu.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Kudu</div>
-                    </a>
-                    <a href="https://pingcap.com" class="tool-card" target="_blank">
-                        <div class="tool-name">TiDB</div>
-                    </a>
-                    <a href="https://hbase.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">HBase</div>
-                    </a>
-                    <a href="https://kylin.apache.org/" class="tool-card" target="_blank">
-                        <div class="tool-name">Kylin</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 大数据存储 & 计算 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">📊</span>
-                    大数据存储 & 计算
-                </div>
-                <div class="tools-grid">
-                    <a href="https://hadoop.apache.org/hdfs" class="tool-card" target="_blank">
-                        <div class="tool-name">HDFS</div>
-                    </a>
-                    <a href="https://hadoop.apache.org/yarn" class="tool-card" target="_blank">
-                        <div class="tool-name">YARN</div>
-                    </a>
-                    <a href="https://spark.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Spark</div>
-                    </a>
-                    <a href="https://hive.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Hive</div>
-                    </a>
-                    <a href="https://hudi.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Hudi</div>
-                    </a>
-                    <a href="https://iceberg.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Iceberg</div>
-                    </a>
-                    <a href="https://delta.io" class="tool-card" target="_blank">
-                        <div class="tool-name">DataLake</div>
-                    </a>
-                    <a href="https://www.starrocks.io" class="tool-card" target="_blank">
-                        <div class="tool-name">StarRocks</div>
-                    </a>
-                    <a href="https://clickhouse.com" class="tool-card" target="_blank">
-                        <div class="tool-name">ClickHouse</div>
-                    </a>
-                    <a href="https://prestodb.io" class="tool-card" target="_blank">
-                        <div class="tool-name">Presto</div>
-                    </a>
-                    <a href="https://trino.io" class="tool-card" target="_blank">
-                        <div class="tool-name">Trino</div>
-                    </a>
-                    <a href="https://kafka.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Kafka</div>
-                    </a>
-                    <a href="https://flink.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Flink</div>
-                    </a>
-                    <a href="https://paimon.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Paimon</div>
-                    </a>
-                    <a href="https://zookeeper.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">ZooKeeper</div>
-                    </a>
-                    <a href="https://pulsar.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Pulsar</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 大数据调度工具 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">⏰</span>
-                    大数据调度工具
-                </div>
-                <div class="tools-grid">
-                    <a href="https://oozie.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Oozie</div>
-                    </a>
-                    <a href="https://dolphinscheduler.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">DolphinScheduler</div>
-                    </a>
-                    <a href="https://airflow.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Airflow</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- ETL/数据集成 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🔄</span>
-                    ETL/数据集成
-                </div>
-                <div class="tools-grid">
-                    <a href="https://github.com/alibaba/canal" class="tool-card" target="_blank">
-                        <div class="tool-name">Canal</div>
-                    </a>
-                    <a href="https://www.clougence.com" class="tool-card" target="_blank">
-                        <div class="tool-name">CloudCanal</div>
-                    </a>
-                    <a href="https://flume.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Flume</div>
-                    </a>
-                    <a href="https://sqoop.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Sqoop</div>
-                    </a>
-                    <a href="https://github.com/alibaba/DataX" class="tool-card" target="_blank">
-                        <div class="tool-name">DataX</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- BI & 数据可视化 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">📈</span>
-                    BI & 数据可视化
-                </div>
-                <div class="tools-grid">
-                    <a href="https://superset.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Superset</div>
-                    </a>
-                    <a href="https://dataease.io" class="tool-card" target="_blank">
-                        <div class="tool-name">DataEase</div>
-                    </a>
-                    <a href="https://grafana.com/" class="tool-card" target="_blank">
-                        <div class="tool-name">Grafana</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- SQL 学习 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">📚</span>
-                    SQL 学习
-                </div>
-                <div class="tools-grid">
-                    <a href="https://sqlzoo.net" class="tool-card" target="_blank">
-                        <div class="tool-name">SQLZoo</div>
-                    </a>
-                    <a href="https://leetcode.cn" class="tool-card" target="_blank">
-                        <div class="tool-name">LeetCode</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 代码管理 & 构建工具 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🔧</span>
-                    代码管理 & 构建工具
-                </div>
-                <div class="tools-grid">
-                    <a href="https://github.com" class="tool-card" target="_blank">
-                        <div class="tool-name">GitHub</div>
-                    </a>
-                    <a href="https://maven.apache.org" class="tool-card" target="_blank">
-                        <div class="tool-name">Maven</div>
-                    </a>
-                    <a href="https://mvnrepository.com" class="tool-card" target="_blank">
-                        <div class="tool-name">MVN Repository</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 绘图/思维导图 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">🎨</span>
-                    绘图/思维导图
-                </div>
-                <div class="tools-grid">
-                    <a href="https://www.xmind.cn" class="tool-card" target="_blank">
-                        <div class="tool-name">XMind</div>
-                    </a>
-                    <a href="https://www.processon.com" class="tool-card" target="_blank">
-                        <div class="tool-name">ProcessOn</div>
-                    </a>
-                    <a href="https://www.drawio.com" class="tool-card" target="_blank">
-                        <div class="tool-name">Draw.io</div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 社区 -->
-            <div class="category">
-                <div class="category-title">
-                    <span class="category-icon">👥</span>
-                    社区
-                </div>
-                <div class="tools-grid">
-                    <a href="https://www.csdn.net/" class="tool-card" target="_blank">
-                        <div class="tool-name">CSDN</div>
-                    </a>
-                    <a href="https://www.v2ex.com/" class="tool-card" target="_blank">
-                        <div class="tool-name">V2EX</div>
-                    </a>
-                    <a href="https://stackoverflow.com/" class="tool-card" target="_blank">
-                        <div class="tool-name">Stack Overflow</div>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>© 2025 技术工具导航站 | 为开发者精心打造</p>
         </div>
     </div>
 
     <script>
-        // 搜索功能
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const toolCards = document.querySelectorAll('.tool-card');
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有分类
             const categories = document.querySelectorAll('.category');
-            
+            const categoryList = document.getElementById('categoryList');
+            const categoriesContainer = document.getElementById('categoriesContainer');
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const searchInput = document.getElementById('searchInput');
+
+            // 存储分类信息
+            const categoryInfo = {
+                'programming': { icon: '💻', name: '编程语言 & JDK' },
+                'development': { icon: '🛠️', name: '开发工具' },
+                'networking': { icon: '🌐', name: '网络/远程工具' },
+                'database': { icon: '🗄️', name: '数据库' },
+                'bigdata': { icon: '📊', name: '大数据工具' },
+                'etl': { icon: '🔄', name: 'ETL/数据集成' },
+                'bi': { icon: '📈', name: 'BI & 数据可视化' },
+                'sql': { icon: '📚', name: 'SQL 学习' },
+                'code': { icon: '🔧', name: '代码管理 & 构建' },
+                'drawing': { icon: '🎨', name: '绘图/思维导图' },
+                'community': { icon: '👥', name: '社区' }
+            };
+
+            // 生成左侧导航栏
+            const uniqueCategories = new Set();
             categories.forEach(category => {
-                let hasVisibleTools = false;
-                const tools = category.querySelectorAll('.tool-card');
+                const categoryType = category.dataset.category;
+                if (!uniqueCategories.has(categoryType) && categoryInfo[categoryType]) {
+                    uniqueCategories.add(categoryType);
+                    const li = document.createElement('li');
+                    li.className = 'category-item';
+                    li.dataset.category = categoryType;
+                    li.innerHTML = `
+                        <span class="category-icon">${categoryInfo[categoryType].icon}</span>
+                        ${categoryInfo[categoryType].name}
+                    `;
+                    categoryList.appendChild(li);
+                }
+            });
+
+            // 分类点击事件
+            categoryList.addEventListener('click', function(e) {
+                const categoryItem = e.target.closest('.category-item');
+                if (!categoryItem) return;
+
+                // 更新选中状态
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                categoryItem.classList.add('active');
+
+                const selectedCategory = categoryItem.dataset.category;
                 
-                tools.forEach(tool => {
-                    const toolName = tool.textContent.toLowerCase();
-                    if (toolName.includes(searchTerm)) {
-                        tool.style.display = 'block';
-                        hasVisibleTools = true;
+                // 显示/隐藏对应分类
+                categories.forEach(category => {
+                    if (selectedCategory === 'all' || category.dataset.category === selectedCategory) {
+                        category.style.display = '';
                     } else {
-                        tool.style.display = 'none';
+                        category.style.display = 'none';
                     }
                 });
+
+                // 在移动端点击分类后关闭侧边栏
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            // 搜索功能
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const toolCards = document.querySelectorAll('.tool-card');
                 
-                category.style.display = hasVisibleTools ? 'block' : 'none';
+                toolCards.forEach(card => {
+                    const toolName = card.querySelector('.tool-name').textContent.toLowerCase();
+                    const category = card.closest('.category');
+                    
+                    if (toolName.includes(searchTerm)) {
+                        card.style.display = '';
+                        if (category) {
+                            category.style.display = '';
+                        }
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // 隐藏空分类
+                categories.forEach(category => {
+                    const visibleTools = category.querySelectorAll('.tool-card[style=""]').length;
+                    category.style.display = visibleTools > 0 ? '' : 'none';
+                });
+            });
+
+            // 移动端菜单切换
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // 点击主内容区域时关闭移动端侧边栏
+            document.querySelector('.main-content').addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
             });
         });
-
-        // 统计工具和分类数量
-        function updateStats() {
-            const toolCount = document.querySelectorAll('.tool-card').length;
-            const categoryCount = document.querySelectorAll('.category').length;
-            
-            document.getElementById('toolCount').textContent = toolCount;
-            document.getElementById('categoryCount').textContent = categoryCount;
-        }
-
-        // 页面加载完成后更新统计
-        document.addEventListener('DOMContentLoaded', updateStats);
-
-        // 添加动画效果
-        function animateStats() {
-            const toolCountElement = document.getElementById('toolCount');
-            const categoryCountElement = document.getElementById('categoryCount');
-            
-            const finalToolCount = parseInt(toolCountElement.textContent);
-            const finalCategoryCount = parseInt(categoryCountElement.textContent);
-            
-            let currentToolCount = 0;
-            let currentCategoryCount = 0;
-            
-            const toolInterval = setInterval(() => {
-                if (currentToolCount < finalToolCount) {
-                    currentToolCount += Math.ceil(finalToolCount / 30);
-                    if (currentToolCount > finalToolCount) currentToolCount = finalToolCount;
-                    toolCountElement.textContent = currentToolCount;
-                } else {
-                    clearInterval(toolInterval);
-                }
-            }, 50);
-            
-            const categoryInterval = setInterval(() => {
-                if (currentCategoryCount < finalCategoryCount) {
-                    currentCategoryCount++;
-                    categoryCountElement.textContent = currentCategoryCount;
-                } else {
-                    clearInterval(categoryInterval);
-                }
-            }, 100);
-        }
-
-        // 页面加载完成后启动动画
-        setTimeout(() => {
-            animateStats();
-        }, 500);
     </script>
 </body>
 </html>
